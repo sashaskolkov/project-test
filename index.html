@@ -2,45 +2,921 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Hello World</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сила ветра — календарь приключений (UX-макет)</title>
+<meta name="robots" content="noindex, nofollow">
 <style>
-  html, body {
-    height: 100%;
+  :root {
+    --blue: #205bdc;
+    --bg: #0e0e0e;
+    --card: #1a1a1a;
+    --card2: #161616;
+    --ink: #f2f2f2;
+    --muted: #9a9a9a;
+    --line: #2a2a2a;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
     margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+  }
+  a { color: inherit; }
+
+  .disclaimer {
+    background: #000;
+    color: #8f9bbf;
+    font-size: 0.78rem;
+    text-align: center;
+    padding: 6px 12px;
+  }
+
+  header.site {
     display: flex;
     align-items: center;
-    justify-content: center;
-    background: #0a0a0a;
+    justify-content: space-between;
+    padding: 18px 24px;
+    max-width: 1180px;
+    margin: 0 auto;
   }
-  h1 {
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 8vw;
-    color: #ffffff;
-    letter-spacing: 0.05em;
-    animation: blink 1s steps(1) infinite;
+  .logo { font-weight: 700; font-size: 1.05rem; letter-spacing: 0.03em; }
+  .logo span { color: var(--blue); }
+  nav.site-nav { display: flex; gap: 20px; font-size: 0.85rem; color: var(--muted); }
+  nav.site-nav a:hover { color: var(--ink); }
+
+  .hero {
+    position: relative;
+    min-height: 46vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(14,14,14,0.92) 100%),
+                url("https://static.tildacdn.com/stor6365-3466-4334-b235-336136656334/5983c05411246bf266135ab64ad3bef8.jpg") center/cover no-repeat;
   }
-  .subtitle {
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 1.5vw;
-    color: #999999;
+  .hero-inner { max-width: 1180px; margin: 0 auto; padding: 40px 24px; width: 100%; }
+  .hero-eyebrow { color: var(--blue); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+  .hero h1 { font-size: clamp(1.6rem, 3.6vw, 2.5rem); margin: 0 0 14px; line-height: 1.2; max-width: 720px; }
+  .hero p { font-size: 1rem; max-width: 560px; color: #c9cede; margin: 0 0 24px; }
+  .cta {
+    display: inline-block;
+    background: var(--blue);
+    color: #fff;
+    padding: 13px 26px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+  }
+  .cta:hover { background: #1a4bb8; }
+
+  .facet-nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(14,14,14,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .facet-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 12px 24px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+  }
+  .chip {
+    flex: none;
+    width: 92px;
+    height: 92px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+  }
+  .chip-label {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.85) 75%);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 600;
+    line-height: 1.2;
+    padding: 16px 6px 6px;
     text-align: center;
-    margin-top: 1em;
   }
-  .subtitle cite {
-    display: block;
-    margin-top: 0.5em;
-    font-style: normal;
-    opacity: 0.7;
+  .chip.active { border-color: var(--blue); }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 40px 24px; }
+
+  h2.section-title { font-size: 1.4rem; margin: 0 0 6px; }
+  p.section-sub { color: var(--muted); margin: 0 0 28px; font-size: 0.9rem; }
+
+  .tour-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 40px;
   }
-  @keyframes blink {
-    50% { opacity: 0; }
+  @media (max-width: 900px) { .tour-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px) { .tour-grid { grid-template-columns: 1fr; } }
+
+  .tour-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
+  .tour-card.hidden-by-filter { display: none; }
+  .tour-photo {
+    height: 150px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .price-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.75);
+    color: #fff;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 999px;
+  }
+  .tour-photo.sold-out .price-badge { background: #205bdc; }
+  .tour-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .tour-body h3 { margin: 0; font-size: 1rem; }
+  .tour-body p.descr { margin: 0; color: var(--muted); font-size: 0.82rem; line-height: 1.45; min-height: 3.9em; }
+  .tour-meta { font-size: 0.78rem; color: #7f9be0; border-top: 1px dashed var(--line); padding-top: 8px; margin-top: auto; }
+  .tour-actions { display: flex; gap: 8px; margin-top: 4px; }
+  .btn-small {
+    flex: 1;
+    text-align: center;
+    padding: 9px 8px;
+    border-radius: 7px;
+    font-size: 0.8rem;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    background: #101010;
+  }
+  .btn-small.primary { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .btn-small.primary:hover { background: #1a4bb8; }
+
+  .installment-note {
+    font-size: 0.85rem;
+    color: var(--muted);
+    background: #141b2e;
+    border: 1px solid #23315a;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 48px;
+  }
+
+  form.lead {
+    background: var(--card2);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 26px;
+    max-width: 460px;
+    margin: 0 auto 48px;
+  }
+  form.lead h2 { margin-top: 0; font-size: 1.2rem; }
+  form.lead p.hint { color: var(--muted); font-size: 0.85rem; margin-top: -6px; }
+  .selected-tour {
+    display: none;
+    font-size: 0.82rem;
+    background: #141b2e;
+    color: #7f9be0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    border: 1px solid #23315a;
+  }
+  .selected-tour.show { display: block; }
+  form.lead input[type="text"], form.lead input[type="tel"] {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--line);
+    background: #0e0e0e;
+    color: var(--ink);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+  }
+  form.lead label.check { display: flex; gap: 8px; align-items: flex-start; font-size: 0.78rem; color: var(--muted); margin-bottom: 14px; }
+  form.lead button { width: 100%; }
+
+  footer.site {
+    text-align: center;
+    padding: 26px 24px 36px;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  footer.site a { color: var(--blue); text-decoration: none; }
 </style>
 </head>
 <body>
-  <div>
-    <h1>HELLO WORLD.</h1>
-    <p class="subtitle">Вы любите розы? Стране нужны паровозы, нам нужен металл!<cite>— Алексей Губин</cite></p>
+
+  <div class="disclaimer">Демонстрационный UX-макет · не официальный сайт «Сила ветра»</div>
+
+  <header class="site">
+    <div class="logo">СИЛА<span>&gt;&gt;&gt;</span>ВЕТРА</div>
+    <nav class="site-nav">
+      <a href="#tours">Приключения</a>
+      <a href="#form">Заявка</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">Календарь приключений · 42 маршрутов</div>
+      <h1>Путешествия под парусами по самым красивым местам мира</h1>
+      <p>Вместе мы исследуем мир — каждый день просыпаемся в новых местах и не знаем,
+         что увидим через несколько часов. С опытными капитанами Силы ветра.</p>
+    </div>
+  </section>
+
+  <div class="facet-nav">
+    <div class="facet-inner" id="facetNav">
+      <button class="chip active" data-tag="all" style="background-image:url('https://static.tildacdn.com/stor6532-3131-4137-b232-623038656164/89739485.jpg')">
+        <span class="chip-label">Все</span>
+      </button>
+      <button class="chip" data-tag="cheap" style="background-image:url('https://static.tildacdn.com/stor3561-3030-4832-b234-393433353831/5d249de9f6af0c66e7d3f6b21cfc4142.jpg')">
+        <span class="chip-label">Самые дешёвые</span>
+      </button>
+      <button class="chip" data-tag="soon" style="background-image:url('https://static.tildacdn.com/stor3361-3431-4431-b161-653734376537/1b5b2424f6606aea48ebb73c9a87446f.jpg')">
+        <span class="chip-label">Ближайшие</span>
+      </button>
+      <button class="chip" data-tag="russia" style="background-image:url('https://static.tildacdn.com/stor3234-6164-4835-a632-373464346463/9ecd340726d5f58443421ea82ae3fad5.jpg')">
+        <span class="chip-label">В России</span>
+      </button>
+      <button class="chip" data-tag="europe" style="background-image:url('https://static.tildacdn.com/stor6539-3038-4233-b234-363362333835/0f627e1573c2e55cd8074f1c8d7abc78.jpg')">
+        <span class="chip-label">Европа</span>
+      </button>
+      <button class="chip" data-tag="tropics" style="background-image:url('https://static.tildacdn.com/stor6230-3737-4838-a539-643738383037/f687be8db54e9a49d84e7caaca68bb04.jpg')">
+        <span class="chip-label">Тропики</span>
+      </button>
+      <button class="chip" data-tag="north" style="background-image:url('https://static.tildacdn.com/stor6236-3132-4563-b163-393065643464/86b3e59b32af6ab3b347eaf88c6819a5.jpg')">
+        <span class="chip-label">Север</span>
+      </button>
+      <button class="chip" data-tag="wild" style="background-image:url('https://static.tildacdn.com/stor6639-6130-4632-b032-363335393962/660ffe22685e369e1a9a99fac8f38d93.jpg')">
+        <span class="chip-label">Дикая природа</span>
+      </button>
+    </div>
   </div>
+
+  <main>
+    <h2 class="section-title" id="tours">Приключения</h2>
+
+    <div class="tour-grid">
+      <article class="tour-card" data-tags="europe">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6532-3131-4137-b232-623038656164/89739485.jpg')">
+          <span class="price-badge">ОТ 115 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Кубок босфора</h3>
+          <p class="descr">Перегоны из Мармариса в Стамбул и обратно и одно из крупнейших международных соревнований в сильнейшей команде инструкторов. Приключения, которые полностью спланировал Владимир Гансон</p>
+          <div class="tour-meta"><strong>СЕНТЯБРЬ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/camp/cup-bosfor" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КУБОК БОСФОРА">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="cheap,soon,europe">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6539-3038-4233-b234-363362333835/0f627e1573c2e55cd8074f1c8d7abc78.jpg')">
+          <span class="price-badge">ОТ 100 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Каникулы в греции</h3>
+          <p class="descr">Переносим картинки из учебников истории в свою фотопленку</p>
+          <div class="tour-meta"><strong>АВГУСТ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/greece" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КАНИКУЛЫ В ГРЕЦИИ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="soon,russia,wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3163-3230-4161-a363-303361663763/0298b7ec70f364a4379527fbafe17947.jpg')">
+          <span class="price-badge">ОТ 154 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Экспедиция по дальнему востоку</h3>
+          <p class="descr">Дикие острова, лежбища глянцевых нерп и редкие северные птицы, которые внесены в Красную книгу</p>
+          <div class="tour-meta"><strong>ИЮЛЬ → СЕНТЯБРЬ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/vladivostok" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ЭКСПЕДИЦИЯ ПО ДАЛЬНЕМУ ВОСТОКУ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="soon,europe,wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6236-3162-4236-b265-323431363163/7c3c74f438a64f94589b3ca44f25e89b.jpg')">
+          <span class="price-badge">145 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Экспедиция на азорские острова</h3>
+          <p class="descr">Исследуем изолированный от Большой земли архипелаг с его нетронутыми пещерами, вулканами, редкими животными и дикими растениями</p>
+          <div class="tour-meta"><strong>ИЮЛЬ → АВГУСТ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/azores" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ЭКСПЕДИЦИЯ НА АЗОРСКИЕ ОСТРОВА">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="soon,europe">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3134-3039-4733-b831-316166333934/e7720ccce19244c21c797c4fd7c1a4a5.jpg')">
+          <span class="price-badge">от 140 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Каникулы на сардинии</h3>
+          <p class="descr">Маршрут как с открытки: пройдем от итальянской Сардинии до французской Корсики и обратно</p>
+          <div class="tour-meta"><strong>АВГУСТ → СЕНТЯБРЬ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/sardinia" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КАНИКУЛЫ НА САРДИНИИ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="europe">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6433-6437-4231-a339-663938323339/0b6fc82f66ba0f362d958925cb8df074.jpg')">
+          <span class="price-badge">ОТ 150 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Большая регата в черногории</h3>
+          <p class="descr">Главный парусный фестиваль с вечеринками и исследованием новых точек на карте</p>
+          <div class="tour-meta"><strong>3 → 10 ОКТЯБРЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/big-regatta-montenegro" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="БОЛЬШАЯ РЕГАТА В ЧЕРНОГОРИИ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="cheap,soon,russia">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3234-6164-4835-a632-373464346463/9ecd340726d5f58443421ea82ae3fad5.jpg')">
+          <span class="price-badge">81 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Парусные экспедиции по ладоге</h3>
+          <p class="descr">Исследуем Ладожские шхеры под парусом, будем пробовать местную рыбу, париться в бане и купаться в прохладной Ладоге</p>
+          <div class="tour-meta"><strong>ИЮЛЬ → СЕНТЯБРЬ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/ladoga" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ПАРУСНЫЕ ЭКСПЕДИЦИИ ПО ЛАДОГЕ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="cheap,north">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6238-3039-4961-b733-333236366130/0fda2d377764bbae6be0b9ca68cdf3a8.jpg')">
+          <span class="price-badge">ОТ 85 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Экспедиция на белое море</h3>
+          <p class="descr">Неповторимая атмосфера Севера и возможность отправиться в самые заповедные места, которые доступны только по воде — других путей нет</p>
+          <div class="tour-meta"><strong>ИЮЛЬ → СЕНТЯБРЬ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/beloe-more" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ЭКСПЕДИЦИЯ НА БЕЛОЕ МОРЕ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="tropics">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6639-3633-4930-b637-303739383635/ce505d19ee6183d4c893da2f245e38b2.jpg')">
+          <span class="price-badge">310 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Экспедиция на маврикий</h3>
+          <p class="descr">Неделя посреди тропических островов и бирюзового океана в поисках обитателей морских глубин</p>
+          <div class="tour-meta"><strong>5 → 12 СЕНТЯБРЯ, 13 → 20 СЕНТЯБРЯ, 21 → 28 СЕНТЯБРЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/mauritius" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ЭКСПЕДИЦИЯ НА МАВРИКИЙ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="soon,europe">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3661-3133-4366-b238-613339313135/a563fc827b77c0dbc04e8b20c0ac3bda.jpg')">
+          <span class="price-badge">ОТ 128 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Каникулы в турции</h3>
+          <p class="descr">Фетхие и Каш: изучаем вечную классику под новым углом</p>
+          <div class="tour-meta"><strong>АВГУСТ → НОЯБРЬ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/turkey" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КАНИКУЛЫ В ТУРЦИИ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="soon,russia,wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6639-6130-4632-b032-363335393962/660ffe22685e369e1a9a99fac8f38d93.jpg')">
+          <span class="price-badge">ОТ 185 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Камчатка. экспедиция на яхте</h3>
+          <p class="descr">Настоящее дикое приключение вдали от цивилизации: увидим косаток и сивучей, будем искать китов, отправимся в трекинг и научимся управлять парусами</p>
+          <div class="tour-meta"><strong>ИЮЛЬ → СЕНТЯБРЬ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/kamchatka" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КАМЧАТКА. ЭКСПЕДИЦИЯ НА ЯХТЕ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="soon,europe,north">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6334-6234-4337-a535-333638616633/46930c44fcdbe844cb3250f8dd8ef57c.jpg')">
+          <span class="price-badge">195 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Экспедиция в шотландию</h3>
+          <p class="descr">Авторская экспедиция с капитаном Машей Мамаевой по западному побережью Шотландии среди суровых скал и древних замков на зеленых холмах</p>
+          <div class="tour-meta"><strong>16 → 23 АВГУСТА, 23 → 30 АВГУСТА</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/scotland-mamaeva" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ЭКСПЕДИЦИЯ В ШОТЛАНДИЮ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="tropics">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6230-3737-4838-a539-643738383037/f687be8db54e9a49d84e7caaca68bb04.jpg')">
+          <span class="price-badge">217 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Каникулы на сейшелах</h3>
+          <p class="descr">Приключения под парусом на тропических островах: будем знакомиться с черепахами, пообнимаемся с пальмами и понаблюдаем за удивительным подводным миром</p>
+          <div class="tour-meta"><strong>НОЯБРЬ 2026</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/seychelles" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КАНИКУЛЫ НА СЕЙШЕЛАХ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3062-3237-4131-a236-313139636438/7f493388c2700def31785eb32fa8c553.jpg')">
+          <span class="price-badge">ОТ 220 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Регата капитанского собрания</h3>
+          <p class="descr">Почувствовать уверенность за штурвалом, найти друзей и начать свою капитанскую историю</p>
+          <div class="tour-meta"><strong>17 → 24 ОКТЯБРЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/captains-regatta" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="РЕГАТА КАПИТАНСКОГО СОБРАНИЯ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="europe">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6336-3534-4935-b039-653635316136/4da65262b1e15fa61975aaa0d80cf0a0.jpg')">
+          <span class="price-badge">ОТ 160 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Новогодняя регата в турции</h3>
+          <p class="descr">Новый год с друзьями и южным солнцем, где каждый может стать королем парусной вечеринки</p>
+          <div class="tour-meta"><strong>26 ДЕКАБРЯ → 2 ЯНВАРЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/turkiye-new-year" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="НОВОГОДНЯЯ РЕГАТА В ТУРЦИИ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6666-3331-4638-a565-386635373638/82baa7e26cd7f32c88f7d2c155f7f61a.jpg')">
+          <span class="price-badge">595 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Трансатлантический переход</h3>
+          <p class="descr">Одна лодка, сплоченная команда из восьми человек, тщательная подготовка, пять полноценных недель и одна большая мечта!</p>
+          <div class="tour-meta"><strong>7 НОЯБРЯ → 12 ДЕКАБЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/transatlantika" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ТРАНСАТЛАНТИЧЕСКИЙ ПЕРЕХОД">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="soon,europe">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6134-3663-4361-b762-303464313438/8ff3f44f59c04832e27b40732bfb76b2.jpg')">
+          <span class="price-badge">155 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Каникулы в нидерландах</h3>
+          <p class="descr">Отправляемся в приключение в одну из самых парусных стран Европы — Нидерланды, где яхтингом занимаются практически все, и даже у короля есть собственный яхт-клуб</p>
+          <div class="tour-meta"><strong>4 → 11 ИЮЛЯ, 11 → 18 ИЮЛЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/netherlands" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КАНИКУЛЫ В НИДЕРЛАНДАХ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="soon,europe">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6365-3466-4334-b235-336136656334/5983c05411246bf266135ab64ad3bef8.jpg')">
+          <span class="price-badge">140 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Каникулы в хорватии</h3>
+          <p class="descr">Самый яхтенный регион Средиземноморья, невероятная природа и прогулки на фоне средневековых городов из кино</p>
+          <div class="tour-meta"><strong>31 ИЮЛЯ → 7 АВГУСТА, 7 → 14 АВГУСТА 2027</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/croatia" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КАНИКУЛЫ В ХОРВАТИИ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="soon,tropics,wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6265-3334-4330-a336-346134386238/6bdfea310d835219cb906b4daae1010a.jpg')">
+          <span class="price-badge">280 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Экспедиция в танзанию</h3>
+          <p class="descr">Гектары нетронутых кораллов, снорклинг и стаи тунца</p>
+          <div class="tour-meta"><strong>22 АВГУСТА → 29 АВГУСТА, 29 АВГУСТА → 5 СЕНТЯБРЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/tanzania" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ЭКСПЕДИЦИЯ В ТАНЗАНИЮ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="cheap,russia,wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6364-3065-4365-a535-393231616565/12157698.jpg')">
+          <span class="price-badge">35 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Дальний восток. приключение на выходных</h3>
+          <p class="descr">Дикие бухты острова Путятин, Уссурийский залив и маяки острова Аскольд</p>
+          <div class="tour-meta"><strong>ИЮЛЬ → СЕНТЯБРЬ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/vladivostok-weekend" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ДАЛЬНИЙ ВОСТОК. ПРИКЛЮЧЕНИЕ НА ВЫХОДНЫХ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="cheap,soon,russia">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6565-3635-4632-b330-643864633262/5ea7556b3d9424d7df114c92d136a65f.jpg')">
+          <span class="price-badge">73 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Экспедиция по волге</h3>
+          <p class="descr">Древние города, волжские просторы и русский фольклор. Отправимся из Кинешмы — по следам былин засыпать под сказки у костра и исследовать берега богатырей</p>
+          <div class="tour-meta"><strong>ИЮЛЬ → СЕНТЯБРЬ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/volga" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ЭКСПЕДИЦИЯ ПО ВОЛГЕ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="soon,europe,north">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3566-6162-4262-b633-666362636365/b73b88d8a98e659daa8a8abcf95aea70.jpg')">
+          <span class="price-badge">145 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Парусная экспедиция по норвегии</h3>
+          <p class="descr">Ходим под парусом по одному из самых протяженных фьордов планеты</p>
+          <div class="tour-meta"><strong>29 АВГУСТА → 5 СЕНТЯБРЯ,, 5 → 12 СЕНТЯБРЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/norway" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ПАРУСНАЯ ЭКСПЕДИЦИЯ ПО НОРВЕГИИ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="cheap,soon,russia">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3965-3132-4136-b262-646639616339/8869333ac475c2f6ba2261dd7c79bf9c.jpg')">
+          <span class="price-badge">от 37 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Ладога. поход на выходных</h3>
+          <p class="descr">Доберемся под парусом до шхер, погуляем по мхам и лишайникам, будем собирать ягоды, ловить рыбу и готовить ужин на всю команду на костре</p>
+          <div class="tour-meta"><strong>ИЮЛЬ → СЕНТЯБРЬ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/ladoga-weekend" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ЛАДОГА. ПОХОД НА ВЫХОДНЫХ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="cheap,soon,russia">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3561-3030-4832-b234-393433353831/5d249de9f6af0c66e7d3f6b21cfc4142.jpg')">
+          <span class="price-badge">36 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Поход по финскому заливу</h3>
+          <p class="descr">Форты, костры и белые ночи под парусами</p>
+          <div class="tour-meta"><strong>ИЮЛЬ → АВГУСТ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/baltic-sea-weekend" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ПОХОД ПО ФИНСКОМУ ЗАЛИВУ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="europe">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6631-6465-4231-a133-323537366533/6b80bf1ba4a82fb7f5399609fded21f0.jpg')">
+          <span class="price-badge">140 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Яхтенный перегон в турции</h3>
+          <p class="descr">Яхтенный перегон — это серьезный формат парусного приключения. Конечно, мы будем выходить на берег, но стоит учитывать, что идти под парусом в открытом море мы можем до суток</p>
+          <div class="tour-meta"><strong>, ОКТЯБРЬ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/fethiye-izmir" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ЯХТЕННЫЙ ПЕРЕГОН В ТУРЦИИ">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="tropics">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3836-3832-4432-a664-363835323631/f2960d9c6d4638231525187082b045b2.jpg')">
+          <span class="price-badge">195 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Экспедиция по островам таиланда</h3>
+          <p class="descr">Тропическое лето, белоснежные пляжи и заповедные острова в регионе Ко Чанг</p>
+          <div class="tour-meta"><strong>14 → 21 НОЯБРЯ, 21 → 28 НОЯБРЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/thailand" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ЭКСПЕДИЦИЯ ПО ОСТРОВАМ ТАИЛАНДА">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="soon,russia,wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3561-3337-4936-b931-363338366633/0d2810f684378a626a03e8fde559b055.jpg')">
+          <span class="price-badge">250 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Приморье [fram]</h3>
+          <p class="descr">Тихоокеанский рубеж: заповедники, крепости и птичьи базары Приморья</p>
+          <div class="tour-meta"><strong>25 → 31 АВГУСТА</strong></div>
+          <div class="tour-actions">
+            <a href="https://fram.club/primorye" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ПРИМОРЬЕ [FRAM]">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="europe,tropics">
+        <div class="tour-photo sold-out" style="background-image:url('https://static.tildacdn.com/stor3464-3936-4336-a666-353864346166/aa73a04810238179f4ad219aac4929b5.jpg')">
+          <span class="price-badge">Лист ожидания</span>
+        </div>
+        <div class="tour-body">
+          <h3>Яхтенный перегон майорка — канары</h3>
+          <p class="descr">1400 морских миль в открытом океане, Средиземном море и Гибралтар, о котором мечтает каждый яхтсмен</p>
+          <div class="tour-meta"><strong>, 17 → 31 ОКТЯБРЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/canary-mallorca" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ЯХТЕННЫЙ ПЕРЕГОН МАЙОРКА — КАНАРЫ">В лист ожидания</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="europe">
+        <div class="tour-photo sold-out" style="background-image:url('https://static.tildacdn.com/stor6566-6635-4565-b961-303761636330/c769828304a5952e82eaac07faae203a.jpg')">
+          <span class="price-badge">Лист ожидания</span>
+        </div>
+        <div class="tour-body">
+          <h3>Каникулы в черногории</h3>
+          <p class="descr">Расширяем карту каникул и классных акваторий — на этот раз едем в Черногорию!</p>
+          <div class="tour-meta"><strong>11 → 18 ИЮЛЯ, 18 → 25 ИЮЛЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/montenegro" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КАНИКУЛЫ В ЧЕРНОГОРИИ">В лист ожидания</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="europe">
+        <div class="tour-photo sold-out" style="background-image:url('https://static.tildacdn.com/stor3463-3832-4335-a166-333364313832/18971353c6292bd78ed78b5c25c916d7.jpg')">
+          <span class="price-badge">Лист ожидания</span>
+        </div>
+        <div class="tour-body">
+          <h3>Каникулы в италии</h3>
+          <p class="descr">Переносим все фотографии с итальянских открыток в реальную жизнь</p>
+          <div class="tour-meta"><strong>19 → 26 СЕНТЯБРЯ, 26 СЕНТЯБРЯ → 3 ОКТЯБРЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/italy" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КАНИКУЛЫ В ИТАЛИИ">В лист ожидания</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="russia">
+        <div class="tour-photo sold-out" style="background-image:url('https://static.tildacdn.com/stor6433-6337-4330-b830-386237303631/0896be392587f445a2c61a182d9be46a.jpg')">
+          <span class="price-badge">Лист ожидания</span>
+        </div>
+        <div class="tour-body">
+          <h3>Каникулы на балтийской косе</h3>
+          <p class="descr">Золотые дюны, старинные форты и заросли диких ягод в самой западной точке России</p>
+          <div class="tour-meta"><strong>ИЮЛЬ → ИЮЛЬ</strong></div>
+          <div class="tour-actions">
+            <a href="https://silavetra.com/travel/baltic" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КАНИКУЛЫ НА БАЛТИЙСКОЙ КОСЕ">В лист ожидания</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="europe,north,wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6236-3132-4563-b163-393065643464/86b3e59b32af6ab3b347eaf88c6819a5.jpg')">
+          <span class="price-badge">395 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Исландия [fram]</h3>
+          <p class="descr">Фьорды, чёрные пляжи, айсберги и термальные источники</p>
+          <div class="tour-meta"><strong>20 → 28 ИЮНЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://fram.club/puteshestvie_v_islandiyu" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ИСЛАНДИЯ [FRAM]">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="soon,tropics,wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6533-6664-4535-a637-313566393365/02c38f44f11480555eab19ac80d94b22.jpg')">
+          <span class="price-badge">400 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Кения [fram]</h3>
+          <p class="descr">Большая африканская пятёрка, Килиманджаро и океан</p>
+          <div class="tour-meta"><strong>16 → 23 АВГУСТА</strong></div>
+          <div class="tour-actions">
+            <a href="https://fram.club/kenya" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КЕНИЯ [FRAM]">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="russia,north">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3138-3238-4866-b539-636463616432/1722954e130b8ce50928ca2fc70f5b24.jpg')">
+          <span class="price-badge">128 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Мурманская область [fram]</h3>
+          <p class="descr">Полуострова Средний и Рыбачий: скалы-колдуны, маяки и следы арктического фронта</p>
+          <div class="tour-meta"><strong>6 → 9 АВГУСТА</strong></div>
+          <div class="tour-actions">
+            <a href="https://fram.club/puteshestvie-rybachiy-sredniy" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="МУРМАНСКАЯ ОБЛАСТЬ [FRAM]">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="soon,russia,north,wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3361-3431-4431-b161-653734376537/1b5b2424f6606aea48ebb73c9a87446f.jpg')">
+          <span class="price-badge">430 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Чукотка [fram]</h3>
+          <p class="descr">Каникулы на Крайнем Севере</p>
+          <div class="tour-meta"><strong>20 → 29 ИЮЛЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://fram.club/chukotka" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ЧУКОТКА [FRAM]">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="russia,wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3064-3061-4539-b833-356633326634/385b637bb89ea8102dc27f40f4532914.jpg')">
+          <span class="price-badge">395 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Острова сахалин и кунашир [fram]</h3>
+          <p class="descr">Маяки, морепродукты и вулканическое спа</p>
+          <div class="tour-meta"><strong>15 → 25 СЕНТЯБРЯ</strong></div>
+          <div class="tour-actions">
+            <a href="https://fram.club/puteshestvie-sahalin-kunashir" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ОСТРОВА САХАЛИН И КУНАШИР [FRAM]">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3564-3034-4438-a636-346634613434/9d296b86d1a8e3bf981fa094347eddf4.jpg')">
+          <span class="price-badge">199 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Казахстан [fram]</h3>
+          <p class="descr">Ледниковые озера Тянь-Шаня, поющий бархан и беркутчи</p>
+          <div class="tour-meta"><strong>СКОРО</strong></div>
+          <div class="tour-actions">
+            <a href="https://fram.club/puteshestvie-almatinskaya-oblast" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КАЗАХСТАН [FRAM]">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3566-3937-4765-a563-363561303862/388064afcc69e77f317ccfd01031a16f.jpg')">
+          <span class="price-badge">350 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Южная корея [fram]</h3>
+          <p class="descr">Дворцы, небоскрёбы, кей-поп и ттокпокки</p>
+          <div class="tour-meta"><strong>СКОРО</strong></div>
+          <div class="tour-actions">
+            <a href="https://fram.club/puteshestvie-v-yuzhnuyu-koreyu" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ЮЖНАЯ КОРЕЯ [FRAM]">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6237-3736-4638-b937-663635643230/af25c26b349f3cd2b6e0fa32c676e296.jpg')">
+          <span class="price-badge">145 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Киргизия [fram]</h3>
+          <p class="descr">Тянь-Шань, семь быков и дорога на Лхасу</p>
+          <div class="tour-meta"><strong>СКОРО</strong></div>
+          <div class="tour-actions">
+            <a href="https://fram.club/kirgiziya" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КИРГИЗИЯ [FRAM]">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="cheap,wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor6432-3932-4339-b633-393038636565/d8e53e8041711a58db77527f237b06b5.jpg')">
+          <span class="price-badge">98 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Южная армения [fram]</h3>
+          <p class="descr">Русалки, виноградники и древние крепости</p>
+          <div class="tour-meta"><strong>СКОРО</strong></div>
+          <div class="tour-actions">
+            <a href="https://fram.club/south_armenia" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="ЮЖНАЯ АРМЕНИЯ [FRAM]">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="cheap,russia,north,wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3432-3433-4436-b031-303865323437/3749d7adf8db5d0b6564f800bd653e52.jpg')">
+          <span class="price-badge">99 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Киты и кольский полуостров [fram]</h3>
+          <p class="descr">Фьорды, киты и водопады</p>
+          <div class="tour-meta"><strong>СКОРО</strong></div>
+          <div class="tour-actions">
+            <a href="https://fram.club/puteshestvie-na-kolskyj-poluostrov" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="КИТЫ И КОЛЬСКИЙ ПОЛУОСТРОВ [FRAM]">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+      <article class="tour-card" data-tags="europe,wild">
+        <div class="tour-photo" style="background-image:url('https://static.tildacdn.com/stor3934-3665-4130-a538-326132633361/1ba5318ee336bd91dd72c3bb57cf4654.jpg')">
+          <span class="price-badge">245 000 ₽</span>
+        </div>
+        <div class="tour-body">
+          <h3>Азоры [fram]</h3>
+          <p class="descr">Место, где Европа встречается с Гавайями</p>
+          <div class="tour-meta"><strong>СКОРО</strong></div>
+          <div class="tour-actions">
+            <a href="https://fram.club/azory" target="_blank" rel="noopener" class="btn-small">Подробнее</a>
+            <a href="#form" class="btn-small primary" data-tour="АЗОРЫ [FRAM]">Оставить заявку</a>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <p class="installment-note">Вы можете оплатить сразу или выбрать беспроцентную рассрочку Т-банка.
+      Оба варианта будут доступны на этапе бронирования.</p>
+
+    <form class="lead" id="form" action="#" onsubmit="return false;">
+      <h2>Оставьте контакты</h2>
+      <p class="hint">Наш отдел заботы свяжется с вами и поможет оперативно подобрать приключение.</p>
+      <div class="selected-tour" id="selectedTour"></div>
+      <input type="hidden" id="tourField" name="tour">
+      <input type="text" placeholder="Имя" required>
+      <input type="tel" placeholder="Телефон или Telegram" required>
+      <label class="check"><input type="checkbox" required> Согласен(на) с политикой конфиденциальности</label>
+      <label class="check"><input type="checkbox"> Разрешаю Силе ветра отправлять мне письма</label>
+      <button type="submit" class="cta">Отправить</button>
+    </form>
+  </main>
+
+  <footer class="site">
+    <div>© 2026 SilaVetra. All Rights Reserved. · <a href="https://silavetra.com" target="_blank" rel="noopener">Правовая информация</a></div>
+    <div style="margin-top:6px;">Это UX-макет, собранный для обсуждения улучшений — не связан с оригинальным сайтом технически. Фото и названия туров — реальные, с silavetra.com/travel.</div>
+  </footer>
+
+<script>
+  document.getElementById('facetNav').addEventListener('click', function (e) {
+    var btn = e.target.closest('.chip');
+    if (!btn) return;
+    document.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
+    btn.classList.add('active');
+    var tag = btn.dataset.tag;
+    document.querySelectorAll('.tour-card').forEach(function (card) {
+      var tags = card.dataset.tags.split(',');
+      var visible = tag === 'all' || tags.indexOf(tag) !== -1;
+      card.classList.toggle('hidden-by-filter', !visible);
+    });
+  });
+
+  document.querySelectorAll('[data-tour]').forEach(function (link) {
+    link.addEventListener('click', function () {
+      var tour = link.dataset.tour;
+      document.getElementById('tourField').value = tour;
+      var badge = document.getElementById('selectedTour');
+      badge.textContent = 'Вы оставляете заявку на: ' + tour;
+      badge.classList.add('show');
+    });
+  });
+</script>
+
 </body>
 </html>
